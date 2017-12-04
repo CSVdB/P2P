@@ -1,6 +1,9 @@
 module P2P.SocketInfo where
 
+import P2P.SockAddr
+
 import Network.Socket
+       hiding (recv, recvFrom, recvLen, send, sendTo)
 
 serverAddr :: SockAddr
 serverAddr = SockAddrInet 4242 hostAddr

@@ -1,10 +1,9 @@
 module P2P.StartServer where
 
-import Network.Socket
-
 import Control.Concurrent (forkIO)
 
 import P2P.Chan
+import P2P.SockAddr
 import P2P.SocketInfo
 
 startserver :: IO ()

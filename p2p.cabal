@@ -29,6 +29,7 @@ library
         P2P.SocketInfo
         P2P.JSONUtils
         P2P.Chan
+        P2P.SockAddr
     build-depends:
         base >=4.7 && <5,
         path >=0.5 && <0.6,

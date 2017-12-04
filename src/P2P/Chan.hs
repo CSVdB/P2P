@@ -5,10 +5,10 @@ module P2P.Chan
 
 import Import
 
-import Network.Socket
-
 import Control.Concurrent.STM.TChan
 import Control.Monad.STM
+
+import P2P.SockAddr
 
 type AddrChan = TChan SockAddr
 
