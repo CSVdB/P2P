@@ -3,6 +3,7 @@ module P2P.AddNode where
 import Control.Concurrent (forkIO)
 
 import P2P.Chan
+import P2P.JSONUtils
 import P2P.SockAddr
 import P2P.SocketInfo
 
@@ -28,5 +29,6 @@ runConn :: Socket -> AddrChan -> IO ()
 runConn _ _ = undefined
 
 connectToNetwork :: SockAddr -> IO ()
-connectToNetwork _ = undefined
--- Send a message to the server with your socket address
+connectToNetwork addr = do
+    sock <- getSocketConnectedToServer
+    sendAll sock $ encode addr

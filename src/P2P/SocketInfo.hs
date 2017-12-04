@@ -28,3 +28,9 @@ getBoundSocket = do
     sock <- getSocket
     bind sock $ SockAddrInet 0 hostAddr
     pure sock
+
+getSocketConnectedToServer :: IO Socket
+getSocketConnectedToServer = do
+    sock <- getSocket
+    connect sock serverAddr
+    pure sock
