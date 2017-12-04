@@ -27,5 +27,5 @@ runConn conn addrChan = do
     case decode msg of
         Nothing -> putStrLn "Cannot parse message as a socket address"
         Just addr -> do
-            write addrChan addr
             updateNeighbours addrChan addr
+            write addrChan addr
