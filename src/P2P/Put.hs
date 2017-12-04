@@ -5,10 +5,9 @@ import P2P.JSONUtils
 import P2P.KeyValPair
 import P2P.SendMessage
 
-put :: Key -> Value -> AddrChan -> StoreChan -> IO ()
-put k v addrChan store = do
+put :: KeyValPair -> AddrChan -> StoreChan -> IO ()
+put pair addrChan store = do
     pairs <- readEverything store
-    let pair = KeyValPair k v
     if pair `elem` pairs
         then pure ()
         else do

@@ -8,6 +8,7 @@ import Control.Concurrent (forkIO)
 
 import P2P.Chan
 import P2P.JSONUtils
+import P2P.Put
 import P2P.SockAddr
 import P2P.SocketInfo
 
@@ -45,7 +46,7 @@ decodeMsg :: ByteString -> AddrChan -> StoreChan -> IO ()
 decodeMsg msg addrChan store = do
     decodeMsgAsAddr msg addrChan
     decodeMsgAsAddrs msg addrChan
-    decodeMsgAsKeyVal msg store
+    decodeMsgAsKeyVal msg addrChan store
 
 decodeMsgAsAddr :: ByteString -> AddrChan -> IO ()
 decodeMsgAsAddr msg addrChan =
@@ -59,8 +60,8 @@ decodeMsgAsAddrs msg addrChan =
         (Just addresses :: Maybe [SockAddr]) -> mapM_ (write addrChan) addresses
         Nothing -> pure ()
 
-decodeMsgAsKeyVal :: ByteString -> StoreChan -> IO ()
-decodeMsgAsKeyVal msg store =
+decodeMsgAsKeyVal :: ByteString -> AddrChan -> StoreChan -> IO ()
+decodeMsgAsKeyVal msg addrChan store =
     case decode msg of
-        Just keyValPair -> write store keyValPair
+        Just keyValPair -> put keyValPair addrChan store
         Nothing -> pure ()
