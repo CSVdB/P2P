@@ -3,6 +3,8 @@ module P2P.StartServer where
 import Control.Concurrent (forkIO)
 
 import P2P.Chan
+import P2P.JSONUtils
+import P2P.Neighbours
 import P2P.SockAddr
 import P2P.SocketInfo
 
@@ -20,8 +22,10 @@ mainloop sock addrChan = do
     mainloop sock addrChan
 
 runConn :: Socket -> AddrChan -> IO ()
-runConn _ _ = undefined
-    -- Use connection with new node to get the socket address
-    -- Add socket address to current list
-    -- Choose new socket's neighbours randomly
-    -- Notify everyone of their new neighbours
+runConn conn addrChan = do
+    msg <- recv conn 1000
+    case decode msg of
+        Nothing -> putStrLn "Cannot parse message as a socket address"
+        Just addr -> do
+            write addrChan addr
+            updateNeighbours addrChan addr
