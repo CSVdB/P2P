@@ -24,6 +24,7 @@ addnode = do
     store <- newTChanIO
     cleanChannel store
     listen sock 2
+    _ <- forkIO $ listenToTerminal addrChan store
     listeningNode sock addrChan store
 
 connectToNetwork :: SockAddr -> IO ()
@@ -37,46 +38,42 @@ listeningNode sock addrChan store = do
     _ <- forkIO $ runConn conn addrChan store
     listeningNode sock addrChan store
 
--- Be able to receive bytestrings from neighbours,
--- holding a key value pair
 runConn :: Socket -> AddrChan -> StoreChan -> IO ()
 runConn conn addrChan store = do
     msg <- recv conn 1000
-    decodeMsg msg addrChan store
+    decodeMsgAsAddr msg addrChan
+    decodeMsgAsAddrs msg addrChan
+    decodeMsgAsKeyVal msg addrChan store
 
-decodeMsg :: ByteString -> AddrChan -> StoreChan -> IO ()
-decodeMsg msg addrChan store = do
-    isAddr <- decodeMsgAsAddr msg addrChan
-    isAddrs <- decodeMsgAsAddrs msg addrChan
-    isKeyVal <- decodeMsgAsKeyVal msg addrChan store
-    when (isAddr || isAddrs || isKeyVal) $
-        decodeMsgAsTerminalInput msg addrChan store
-
-decodeMsgAsAddr :: ByteString -> AddrChan -> IO Bool
+decodeMsgAsAddr :: ByteString -> AddrChan -> IO ()
 decodeMsgAsAddr msg addrChan =
     case decode msg of
-        Just addr -> const True <$> write addrChan addr
-        Nothing -> pure False
+        Just addr -> write addrChan addr
+        Nothing -> pure ()
 
-decodeMsgAsAddrs :: ByteString -> AddrChan -> IO Bool
+decodeMsgAsAddrs :: ByteString -> AddrChan -> IO ()
 decodeMsgAsAddrs msg addrChan =
     case decode msg of
-        (Just addresses :: Maybe [SockAddr]) ->
-            const True <$> mapM_ (write addrChan) addresses
-        Nothing -> pure False
+        (Just addresses :: Maybe [SockAddr]) -> mapM_ (write addrChan) addresses
+        Nothing -> pure ()
 
-decodeMsgAsKeyVal :: ByteString -> AddrChan -> StoreChan -> IO Bool
+decodeMsgAsKeyVal :: ByteString -> AddrChan -> StoreChan -> IO ()
 decodeMsgAsKeyVal msg addrChan store =
     case decode msg of
-        Just keyValPair -> const True <$> put keyValPair addrChan store
-        Nothing -> pure False
+        Just keyValPair -> put keyValPair addrChan store
+        Nothing -> pure ()
 
-decodeMsgAsTerminalInput :: ByteString -> AddrChan -> StoreChan -> IO ()
-decodeMsgAsTerminalInput msg addrChan store = do
-    let arguments = words $ show msg
-    case arguments of
-        "put":k:[v] ->
+listenToTerminal :: AddrChan -> StoreChan -> IO ()
+listenToTerminal addrChan store = do
+    line <- getLine
+    processTerminalInput line addrChan store
+    listenToTerminal addrChan store
+
+processTerminalInput :: String -> AddrChan -> StoreChan -> IO ()
+processTerminalInput input addrChan store =
+    case words input of
+        ["put", k, v] ->
             let pair = KeyValPair k v
             in put pair addrChan store
-        "get":[k] -> get k store
-        _ -> putStrLn $ "Could not parse " ++ show msg
+        ["get", k] -> get k store
+        _ -> putStrLn $ "Could not parse " ++ show input
