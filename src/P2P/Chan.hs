@@ -8,9 +8,12 @@ import Import
 import Control.Concurrent.STM.TChan
 import Control.Monad.STM
 
+import P2P.KeyValPair
 import P2P.SockAddr
 
 type AddrChan = TChan SockAddr
+
+type StoreChan = TChan KeyValPair
 
 cleanChannel :: TChan a -> IO ()
 cleanChannel chan = void $ readTheRest chan []

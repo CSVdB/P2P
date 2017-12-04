@@ -32,6 +32,7 @@ library
         P2P.SockAddr
         P2P.Neighbours
         P2P.SendMessage
+        P2P.KeyValPair
     build-depends:
         base >=4.7 && <5,
         path >=0.5 && <0.6,
