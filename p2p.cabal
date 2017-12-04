@@ -31,6 +31,7 @@ library
         P2P.Chan
         P2P.SockAddr
         P2P.Neighbours
+        P2P.SendMessage
     build-depends:
         base >=4.7 && <5,
         path >=0.5 && <0.6,
