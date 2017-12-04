@@ -6,6 +6,8 @@ import Prelude as X
 
 import Data.ByteString as X (ByteString)
 import Data.Char as X
+import Data.List as X
+import Data.Maybe as X
 import Path as X
 import Path.IO as X
 import System.Exit as X
