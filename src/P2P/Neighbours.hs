@@ -1,7 +1,11 @@
 module P2P.Neighbours where
 
+import Import
+
 import P2P.Chan
+import P2P.JSONUtils
 import P2P.SockAddr
+import P2P.SocketInfo
 
 import Test.QuickCheck.Gen
 
@@ -26,7 +30,15 @@ genMore n list xs = do
         else genMore (n - 1) list (x : xs)
 
 notify :: [SockAddr] -> SockAddr -> IO ()
-notify = undefined
+notify addresses addr = do
+    mapM_ (sendInfo (encode addr)) addresses
+    mapM_ (flip sendInfo addr . encode) addresses
+
+sendInfo :: ByteString -> SockAddr -> IO ()
+sendInfo msg addr = do
+    sock <- getSocket
+    connect sock addr
+    sendAll sock msg
 
 minNumOfNeighbours :: Int
 minNumOfNeighbours = 5
