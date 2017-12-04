@@ -32,7 +32,7 @@ genMore n list xs = do
 notify :: [SockAddr] -> SockAddr -> IO ()
 notify addresses addr = do
     mapM_ (sendInfo (encode addr)) addresses
-    mapM_ (flip sendInfo addr . encode) addresses
+    flip sendInfo addr $ encode addresses
 
 sendInfo :: ByteString -> SockAddr -> IO ()
 sendInfo msg addr = do

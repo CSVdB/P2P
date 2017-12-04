@@ -1,4 +1,8 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module P2P.AddNode where
+
+import Import
 
 import Control.Concurrent (forkIO)
 
@@ -22,11 +26,22 @@ listeningNode sock addrChan = do
     _ <- forkIO $ runConn conn addrChan
     listeningNode sock addrChan
 
--- Listen for messages from the server which should tell you
--- about new neighbours
--- as well as messages from new neighbours "ByteString" (holding a key value pair)
+-- Be able to receive bytestrings from neighbours,
+-- holding a key value pair
 runConn :: Socket -> AddrChan -> IO ()
-runConn _ _ = undefined
+runConn conn addrChan = do
+    msg <- recv conn 1000
+    decodeMsgAsSockAddr msg addrChan
+
+decodeMsgAsSockAddr :: ByteString -> AddrChan -> IO ()
+decodeMsgAsSockAddr msg addrChan =
+    case decode msg of
+        Just addr -> write addrChan addr
+        Nothing ->
+            case decode msg of
+                (Just addresses :: Maybe [SockAddr]) ->
+                    mapM_ (write addrChan) addresses
+                Nothing -> putStrLn "Cannot parse as socket addresses"
 
 connectToNetwork :: SockAddr -> IO ()
 connectToNetwork addr = do
